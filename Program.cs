@@ -46,11 +46,19 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Get password from environment variable
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+// Replace placeholder
+connectionString = connectionString.Replace("{DB_PASSWORD}", dbPassword);
+
 // MySQL + EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+        connectionString,
+        ServerVersion.AutoDetect(connectionString)
     )
 );
 
