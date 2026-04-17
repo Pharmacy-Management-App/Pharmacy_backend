@@ -17,7 +17,8 @@ namespace PharmacyAPI.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Prescription> Prescriptions { get; set; }
-        public DbSet<Inventory> Inventories { get; set; }
+
+        public DbSet<Inventory> Inventory { get; set; }
         public DbSet<EmailVerification> EmailVerifications { get; set; }
         public DbSet<LoginHistory> LoginHistories { get; set; }
 
@@ -33,6 +34,14 @@ namespace PharmacyAPI.Data
                 entity.Property(u => u.Password).IsRequired();
                 entity.Property(u => u.Role).HasDefaultValue("Customer");
             });
+            // Seed Categories
+            modelBuilder.Entity<Category>().HasData(
+               new Category { Id = 1, Name = "Antibiotics", Description = "Bacterial infection medicines", IsActive = true, CreatedAt = DateTime.UtcNow },
+               new Category { Id = 2, Name = "Painkillers", Description = "Pain relief medicines", IsActive = true, CreatedAt = DateTime.UtcNow },
+               new Category { Id = 3, Name = "Vitamins", Description = "Vitamin supplements", IsActive = true, CreatedAt = DateTime.UtcNow },
+               new Category { Id = 4, Name = "Antidiabetics", Description = "Diabetes management", IsActive = true, CreatedAt = DateTime.UtcNow },
+               new Category { Id = 5, Name = "Cardiovascular", Description = "Heart & BP medicines", IsActive = true, CreatedAt = DateTime.UtcNow }
+           );
 
             // ── Pharmacist ───────────────────────────────────────────
             modelBuilder.Entity<Pharmacist>(entity =>
