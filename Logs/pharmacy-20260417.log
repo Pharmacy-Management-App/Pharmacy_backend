@@ -1,0 +1,768 @@
+2026-04-17 14:45:45.025 +05:30 [INF] Executed DbCommand (25ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE DATABASE `HackDB`;
+2026-04-17 14:45:45.084 +05:30 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-04-17 14:45:45.098 +05:30 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT GET_LOCK('__HackDB_EFMigrationsLock', 259200)
+2026-04-17 14:45:45.206 +05:30 [INF] Executed DbCommand (69ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
+    `MigrationId` varchar(150) CHARACTER SET utf8mb4 NOT NULL,
+    `ProductVersion` varchar(32) CHARACTER SET utf8mb4 NOT NULL,
+    CONSTRAINT `PK___EFMigrationsHistory` PRIMARY KEY (`MigrationId`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.243 +05:30 [INF] Executed DbCommand (25ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='HackDB' AND TABLE_NAME='__EFMigrationsHistory';
+2026-04-17 14:45:45.253 +05:30 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2026-04-17 14:45:45.259 +05:30 [INF] Applying migration '20260417091511_InitialCreate'.
+2026-04-17 14:45:45.303 +05:30 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER DATABASE CHARACTER SET utf8mb4;
+2026-04-17 14:45:45.322 +05:30 [INF] Executed DbCommand (19ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Categories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+    `Description` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_Categories` PRIMARY KEY (`Id`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.340 +05:30 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Users` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `FullName` varchar(150) CHARACTER SET utf8mb4 NOT NULL,
+    `Email` varchar(200) CHARACTER SET utf8mb4 NOT NULL,
+    `Password` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Phone` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Address` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Role` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Customer'),
+    `IsEmailVerified` tinyint(1) NOT NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Users` PRIMARY KEY (`Id`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.371 +05:30 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Medicines` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `CategoryId` int NOT NULL,
+    `Name` varchar(200) CHARACTER SET utf8mb4 NOT NULL,
+    `GenericName` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Manufacturer` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Description` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Price` decimal(10,2) NOT NULL,
+    `DosageForm` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Strength` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `RequiresPrescription` tinyint(1) NOT NULL,
+    `ImagePath` longtext CHARACTER SET utf8mb4 NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Medicines` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Medicines_Categories_CategoryId` FOREIGN KEY (`CategoryId`) REFERENCES `Categories` (`Id`) ON DELETE RESTRICT
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.404 +05:30 [INF] Executed DbCommand (33ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `EmailVerifications` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `Token` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsUsed` tinyint(1) NOT NULL,
+    `ExpiresAt` datetime(6) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_EmailVerifications` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_EmailVerifications_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.435 +05:30 [INF] Executed DbCommand (31ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `LoginHistories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `IpAddress` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `DeviceInfo` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsSuccess` tinyint(1) NOT NULL,
+    `LoginAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_LoginHistories` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_LoginHistories_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.467 +05:30 [INF] Executed DbCommand (32ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Pharmacists` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `LicenseNumber` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+    `Qualification` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Specialization` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Pending'),
+    `ProfileImagePath` longtext CHARACTER SET utf8mb4 NULL,
+    `JoinedAt` datetime(6) NOT NULL,
+    `ApprovedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Pharmacists` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Pharmacists_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.496 +05:30 [INF] Executed DbCommand (29ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Prescriptions` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `FilePath` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `OriginalFileName` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `ReviewedBy` longtext CHARACTER SET utf8mb4 NULL,
+    `Notes` longtext CHARACTER SET utf8mb4 NULL,
+    `UploadedAt` datetime(6) NOT NULL,
+    `ReviewedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Prescriptions` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Prescriptions_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.525 +05:30 [INF] Executed DbCommand (29ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Inventories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `MedicineId` int NOT NULL,
+    `QuantityInStock` int NOT NULL,
+    `ReorderLevel` int NOT NULL,
+    `MaxStockLevel` int NOT NULL,
+    `ExpiryDate` datetime(6) NULL,
+    `BatchNumber` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `LastUpdated` datetime(6) NOT NULL,
+    CONSTRAINT `PK_Inventories` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Inventories_Medicines_MedicineId` FOREIGN KEY (`MedicineId`) REFERENCES `Medicines` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.571 +05:30 [INF] Executed DbCommand (45ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Orders` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `PrescriptionId` int NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Pending'),
+    `TotalAmount` decimal(12,2) NOT NULL,
+    `DeliveryAddress` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `PaymentMethod` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `PaymentStatus` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Notes` longtext CHARACTER SET utf8mb4 NULL,
+    `OrderedAt` datetime(6) NOT NULL,
+    `DeliveredAt` datetime(6) NULL,
+    CONSTRAINT `PK_Orders` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Orders_Prescriptions_PrescriptionId` FOREIGN KEY (`PrescriptionId`) REFERENCES `Prescriptions` (`Id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_Orders_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE RESTRICT
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.600 +05:30 [INF] Executed DbCommand (29ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `OrderItems` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `OrderId` int NOT NULL,
+    `MedicineId` int NOT NULL,
+    `Quantity` int NOT NULL,
+    `UnitPrice` decimal(10,2) NOT NULL,
+    `TotalPrice` decimal(10,2) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_OrderItems` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_OrderItems_Medicines_MedicineId` FOREIGN KEY (`MedicineId`) REFERENCES `Medicines` (`Id`) ON DELETE RESTRICT,
+    CONSTRAINT `FK_OrderItems_Orders_OrderId` FOREIGN KEY (`OrderId`) REFERENCES `Orders` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 14:45:45.620 +05:30 [INF] Executed DbCommand (19ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_EmailVerifications_UserId` ON `EmailVerifications` (`UserId`);
+2026-04-17 14:45:45.632 +05:30 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Inventories_MedicineId` ON `Inventories` (`MedicineId`);
+2026-04-17 14:45:46.408 +05:30 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_LoginHistories_UserId` ON `LoginHistories` (`UserId`);
+2026-04-17 14:45:46.429 +05:30 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Medicines_CategoryId` ON `Medicines` (`CategoryId`);
+2026-04-17 14:45:46.441 +05:30 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_OrderItems_MedicineId` ON `OrderItems` (`MedicineId`);
+2026-04-17 14:45:46.452 +05:30 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_OrderItems_OrderId` ON `OrderItems` (`OrderId`);
+2026-04-17 14:45:46.469 +05:30 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Orders_PrescriptionId` ON `Orders` (`PrescriptionId`);
+2026-04-17 14:45:46.487 +05:30 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Orders_UserId` ON `Orders` (`UserId`);
+2026-04-17 14:45:46.500 +05:30 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Pharmacists_LicenseNumber` ON `Pharmacists` (`LicenseNumber`);
+2026-04-17 14:45:46.510 +05:30 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Pharmacists_UserId` ON `Pharmacists` (`UserId`);
+2026-04-17 14:45:46.526 +05:30 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Prescriptions_UserId` ON `Prescriptions` (`UserId`);
+2026-04-17 14:45:46.545 +05:30 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Users_Email` ON `Users` (`Email`);
+2026-04-17 14:45:46.550 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
+VALUES ('20260417091511_InitialCreate', '9.0.15');
+2026-04-17 14:45:46.552 +05:30 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT RELEASE_LOCK('__HackDB_EFMigrationsLock')
+2026-04-17 15:24:54.416 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:24:55.922 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:24:56.333 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:24:56.902 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:24:56.907 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:24:56.909 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:24:57.845 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger - null null
+2026-04-17 15:24:58.690 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger - 301 0 null 904.4825ms
+2026-04-17 15:24:58.706 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/index.html - null null
+2026-04-17 15:24:58.863 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/index.html - 200 null text/html;charset=utf-8 158.2859ms
+2026-04-17 15:24:58.877 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui.css - null null
+2026-04-17 15:24:58.877 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/index.css - null null
+2026-04-17 15:24:58.921 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui-standalone-preset.js - null null
+2026-04-17 15:24:58.883 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:24:58.878 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui-bundle.js - null null
+2026-04-17 15:24:58.926 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/index.js - null null
+2026-04-17 15:24:58.977 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui.css - 200 23647 text/css 100.4126ms
+2026-04-17 15:24:58.977 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/index.css - 200 152 text/css 100.3796ms
+2026-04-17 15:24:59.056 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 166.1841ms
+2026-04-17 15:24:59.189 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui-bundle.js - 200 424767 text/javascript 310.9778ms
+2026-04-17 15:24:59.193 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/index.js - 200 null application/javascript;charset=utf-8 266.8879ms
+2026-04-17 15:24:59.191 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/swagger-ui-standalone-preset.js - 200 77352 text/javascript 306.8215ms
+2026-04-17 15:24:59.282 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:24:59.523 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 240.3357ms
+2026-04-17 15:24:59.628 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:24:59.787 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/favicon-32x32.png - null null
+2026-04-17 15:24:59.787 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:24:59.843 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/favicon-32x32.png - 200 628 image/png 56.4686ms
+2026-04-17 15:24:59.901 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 273.2164ms
+2026-04-17 15:25:43.398 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:25:43.398 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:25:43.491 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 102.9326ms
+2026-04-17 15:25:43.524 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 135.4626ms
+2026-04-17 15:25:43.566 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:25:43.768 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:25:43.828 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 262.4694ms
+2026-04-17 15:29:26.340 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json - null null
+2026-04-17 15:29:26.483 +05:30 [WRN] Failed to determine the https port for redirect.
+2026-04-17 15:29:30.419 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json - 404 0 null 4100.377ms
+2026-04-17 15:29:30.439 +05:30 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json, Response status code: 404
+2026-04-17 15:34:53.747 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:34:54.204 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:34:54.451 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:34:55.013 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:34:55.016 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:34:55.019 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:34:55.265 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:34:55.267 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:34:55.355 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 112.6868ms
+2026-04-17 15:34:55.525 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 285.4138ms
+2026-04-17 15:34:55.586 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:34:55.762 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:34:55.801 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 215.0221ms
+2026-04-17 15:42:43.256 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:42:43.562 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:42:43.791 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:42:44.196 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:42:44.198 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:42:44.200 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:42:44.788 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:42:44.789 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:42:44.844 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 74.4072ms
+2026-04-17 15:42:44.959 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 190.7571ms
+2026-04-17 15:42:45.030 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:42:45.227 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:42:45.270 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 240.531ms
+2026-04-17 15:42:58.497 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json - null null
+2026-04-17 15:42:58.529 +05:30 [WRN] Failed to determine the https port for redirect.
+2026-04-17 15:42:58.661 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json - 404 0 null 163.8776ms
+2026-04-17 15:42:58.670 +05:30 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5064/.well-known/appspecific/com.chrome.devtools.json, Response status code: 404
+2026-04-17 15:49:07.577 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:49:07.852 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:49:08.052 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:49:08.186 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:49:08.189 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:49:08.191 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:49:09.056 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:49:09.055 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:49:09.169 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 127.6137ms
+2026-04-17 15:49:09.241 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 202.6102ms
+2026-04-17 15:49:09.308 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:49:09.501 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:49:09.573 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 264.4536ms
+2026-04-17 15:52:25.593 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:52:25.817 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:52:25.993 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:52:26.272 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:52:26.273 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:52:26.275 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:52:26.497 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/ - null null
+2026-04-17 15:52:26.804 +05:30 [WRN] Failed to determine the https port for redirect.
+2026-04-17 15:52:26.982 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/ - 404 0 null 497.1419ms
+2026-04-17 15:52:27.003 +05:30 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5064/, Response status code: 404
+2026-04-17 15:52:35.719 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:52:35.719 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:52:35.739 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 21.8554ms
+2026-04-17 15:52:35.820 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 102.4052ms
+2026-04-17 15:52:35.901 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:52:36.012 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:52:36.092 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 191.4334ms
+2026-04-17 15:53:21.047 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:53:21.290 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:53:21.493 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:53:21.932 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:53:21.935 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:53:21.939 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:53:22.529 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:53:22.530 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:53:22.580 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 62.4184ms
+2026-04-17 15:53:22.682 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 176.7971ms
+2026-04-17 15:53:22.756 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:53:22.901 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:53:22.959 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 200.9832ms
+2026-04-17 15:57:39.214 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 15:57:39.581 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 15:57:39.904 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 15:57:40.061 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 15:57:40.065 +05:30 [INF] Hosting environment: Development
+2026-04-17 15:57:40.067 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 15:57:41.210 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 15:57:41.210 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 15:57:41.315 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 118.117ms
+2026-04-17 15:57:41.405 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 209.9485ms
+2026-04-17 15:57:41.462 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 15:57:41.597 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 15:57:41.654 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 192.0512ms
+2026-04-17 16:00:34.775 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 16:00:35.030 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 16:00:35.219 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 16:00:35.375 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 16:00:35.378 +05:30 [INF] Hosting environment: Development
+2026-04-17 16:00:35.380 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 16:00:35.771 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 16:00:35.771 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 16:00:35.817 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 66.3506ms
+2026-04-17 16:00:35.914 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 166.5739ms
+2026-04-17 16:00:35.974 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 16:00:36.144 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 16:00:36.192 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 217.919ms
+2026-04-17 16:00:48.478 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/index.html - null null
+2026-04-17 16:00:48.779 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/index.html - 200 null text/html;charset=utf-8 301.6797ms
+2026-04-17 16:00:48.788 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 16:00:48.793 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 16:00:48.812 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 18.3285ms
+2026-04-17 16:00:48.815 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 27.317ms
+2026-04-17 16:00:48.926 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 16:00:49.005 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 16:00:49.020 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 93.5983ms
+2026-04-17 18:37:59.387 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 18:37:59.617 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 18:37:59.789 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 18:38:00.099 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 18:38:00.101 +05:30 [INF] Hosting environment: Development
+2026-04-17 18:38:00.102 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 18:38:02.591 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 18:38:02.597 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 18:38:02.810 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 236.3426ms
+2026-04-17 18:38:03.216 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 652.0382ms
+2026-04-17 18:38:03.272 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 18:38:03.402 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 18:38:03.443 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 171.4923ms
+2026-04-17 18:43:59.392 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 18:43:59.681 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 18:43:59.897 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 18:44:00.088 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 18:44:00.091 +05:30 [INF] Hosting environment: Development
+2026-04-17 18:44:00.094 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 18:44:00.593 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 18:44:00.594 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 18:44:00.665 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 90.1043ms
+2026-04-17 18:44:00.766 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 193.8996ms
+2026-04-17 18:44:00.844 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 18:44:00.958 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 18:44:00.995 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 151.5106ms
+2026-04-17 18:44:04.080 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/index.html - null null
+2026-04-17 18:44:04.303 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/index.html - 200 null text/html;charset=utf-8 223.8522ms
+2026-04-17 18:44:04.306 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 18:44:04.311 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 18:44:04.326 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 14.9154ms
+2026-04-17 18:44:04.338 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 31.9523ms
+2026-04-17 18:44:04.381 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 18:44:04.423 +05:30 [ERR] Unhandled Exception: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Failed to generate Operation for action - PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI). See inner exception
+ ---> Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Error reading parameter(s) for action PharmacyAPI.Controllers.PrescriptionController.Upload (PharmacyAPI) as [FromForm] attribute used with IFormFile. Please refer to https://github.com/domaindrivendev/Swashbuckle.AspNetCore/tree/master/docs/configure-and-customize-swaggergen.md#handle-forms-and-file-uploads for more information
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parameterGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateParametersAsync(ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   --- End of inner exception stack trace ---
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`3 parametersGenerator, Func`3 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at PharmacyAPI.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in D:\.Net-Web\Pharmacy_backend\Middleware\ExceptionMiddleware.cs:line 25
+2026-04-17 18:44:04.433 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 500 null application/json 52.4039ms
+2026-04-17 18:53:12.965 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 18:53:13.222 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 18:53:13.427 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 18:53:13.757 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 18:53:13.760 +05:30 [INF] Hosting environment: Development
+2026-04-17 18:53:13.762 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 18:53:14.374 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 18:53:14.374 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 18:53:14.484 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 123.5604ms
+2026-04-17 18:53:14.585 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 227.3366ms
+2026-04-17 18:53:14.660 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 18:53:14.795 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 135.6378ms
+2026-04-17 18:59:32.828 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 18:59:33.105 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 18:59:33.282 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 18:59:33.669 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 18:59:33.672 +05:30 [INF] Hosting environment: Development
+2026-04-17 18:59:33.674 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 18:59:33.762 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 18:59:33.761 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 18:59:33.811 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 47.8265ms
+2026-04-17 18:59:33.953 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 203.8937ms
+2026-04-17 18:59:34.002 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 18:59:34.088 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 85.81ms
+2026-04-17 19:03:56.324 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 19:03:56.860 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 19:03:57.219 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 19:03:57.813 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 19:03:57.819 +05:30 [INF] Hosting environment: Development
+2026-04-17 19:03:57.826 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 19:03:58.115 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 19:03:58.113 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 19:03:58.421 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 333.2911ms
+2026-04-17 19:03:58.615 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 531.843ms
+2026-04-17 19:03:58.718 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 19:03:58.902 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 184.5806ms
+2026-04-17 19:04:18.347 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 19:04:18.595 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 19:04:18.873 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 19:04:19.078 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 19:04:19.082 +05:30 [INF] Hosting environment: Development
+2026-04-17 19:04:19.085 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 19:04:19.840 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 19:04:19.838 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 19:04:20.044 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 198.4884ms
+2026-04-17 19:04:20.121 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 317.1836ms
+2026-04-17 19:04:20.247 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 19:04:20.332 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 84.6346ms
+2026-04-17 19:16:56.157 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 19:16:56.518 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 19:16:56.740 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 19:16:57.439 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 19:16:57.444 +05:30 [INF] Hosting environment: Development
+2026-04-17 19:16:57.449 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 19:16:58.054 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 19:16:58.059 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 19:16:58.383 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 339.8105ms
+2026-04-17 19:16:58.554 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 520.683ms
+2026-04-17 19:16:58.662 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 19:16:58.846 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 184.41ms
+2026-04-17 19:26:35.424 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - null null
+2026-04-17 19:26:35.767 +05:30 [WRN] Failed to determine the https port for redirect.
+2026-04-17 19:26:35.788 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:38.750 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:38.759 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:38.769 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - 401 0 null 3363.6289ms
+2026-04-17 19:26:41.341 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/users - null null
+2026-04-17 19:26:41.352 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:41.358 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:41.361 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:41.363 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/users - 401 0 null 22.0849ms
+2026-04-17 19:26:42.866 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - null null
+2026-04-17 19:26:42.876 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:42.901 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:42.903 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:42.907 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - 401 0 null 40.4337ms
+2026-04-17 19:26:45.031 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/medicines - null null
+2026-04-17 19:26:45.039 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:45.041 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:45.044 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:45.047 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/medicines - 401 0 null 15.9972ms
+2026-04-17 19:26:46.487 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/inventory - null null
+2026-04-17 19:26:46.492 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:46.494 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:46.496 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:46.498 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/inventory - 401 0 null 11.4771ms
+2026-04-17 19:26:48.597 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/medicines - null null
+2026-04-17 19:26:48.603 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:48.605 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:48.607 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:48.609 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/medicines - 401 0 null 11.809ms
+2026-04-17 19:26:49.601 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - null null
+2026-04-17 19:26:49.608 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:49.610 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:49.612 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:49.614 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - 401 0 null 12.9949ms
+2026-04-17 19:26:50.610 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/users - null null
+2026-04-17 19:26:50.615 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:50.617 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:50.619 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:50.622 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/users - 401 0 null 11.0684ms
+2026-04-17 19:26:51.795 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - null null
+2026-04-17 19:26:51.801 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:51.803 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:51.805 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:51.807 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - 401 0 null 12.2869ms
+2026-04-17 19:26:55.912 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/users - null null
+2026-04-17 19:26:55.917 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:55.920 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:55.923 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:55.925 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/users - 401 0 null 12.9934ms
+2026-04-17 19:26:57.179 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - null null
+2026-04-17 19:26:57.185 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:57.187 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:57.188 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:57.190 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - 401 0 null 11.3998ms
+2026-04-17 19:26:58.993 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists/pending - null null
+2026-04-17 19:26:58.999 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:26:59.000 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:26:59.002 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:26:59.004 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists/pending - 401 0 null 10.2164ms
+2026-04-17 19:27:00.925 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - null null
+2026-04-17 19:27:00.931 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:00.932 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:27:00.934 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:00.937 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/pharmacists - 401 0 null 11.7584ms
+2026-04-17 19:27:02.084 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/medicines - null null
+2026-04-17 19:27:02.089 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:02.094 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:27:02.098 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:02.101 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/medicines - 401 0 null 17.6194ms
+2026-04-17 19:27:11.829 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/inventory - null null
+2026-04-17 19:27:11.835 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:11.839 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:27:11.842 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:11.845 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/inventory - 401 0 null 15.5868ms
+2026-04-17 19:27:36.498 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/pending - null null
+2026-04-17 19:27:36.505 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:36.508 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:36.510 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:36.513 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/pending - 401 0 null 15.7302ms
+2026-04-17 19:27:38.692 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/pending - null null
+2026-04-17 19:27:38.701 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:38.703 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:38.706 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:38.708 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/pending - 401 0 null 15.6542ms
+2026-04-17 19:27:40.551 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/approved - null null
+2026-04-17 19:27:40.556 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:40.560 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:40.561 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:40.563 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/approved - 401 0 null 12.2032ms
+2026-04-17 19:27:41.846 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/pending - null null
+2026-04-17 19:27:41.851 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:41.852 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:41.854 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:41.856 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/pending - 401 0 null 9.1232ms
+2026-04-17 19:27:42.819 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/pending - null null
+2026-04-17 19:27:42.824 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:42.825 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:42.827 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:42.829 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/pending - 401 0 null 10.3722ms
+2026-04-17 19:27:45.025 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/pending - null null
+2026-04-17 19:27:45.030 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:45.033 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:45.034 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:45.037 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/pending - 401 0 null 11.6074ms
+2026-04-17 19:27:46.204 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/prescription/approved - null null
+2026-04-17 19:27:46.209 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:27:46.210 +05:30 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Pharmacist)
+2026-04-17 19:27:46.212 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:27:46.214 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/prescription/approved - 401 0 null 10.2001ms
+2026-04-17 19:28:06.744 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - null null
+2026-04-17 19:28:06.756 +05:30 [INF] CORS policy execution successful.
+2026-04-17 19:28:06.758 +05:30 [INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Admin)
+2026-04-17 19:28:06.762 +05:30 [INF] AuthenticationScheme: Bearer was challenged.
+2026-04-17 19:28:06.764 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/api/admin/dashboard - 401 0 null 20.6638ms
+2026-04-17 19:35:25.707 +05:30 [INF] User profile is available. Using 'C:\Users\sumat\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-17 19:35:25.894 +05:30 [WRN] The WebRootPath was not found: D:\.Net-Web\Pharmacy_backend\wwwroot. Static files may be unavailable.
+2026-04-17 19:35:26.027 +05:30 [INF] Now listening on: http://localhost:5064
+2026-04-17 19:35:26.115 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-04-17 19:35:26.117 +05:30 [INF] Hosting environment: Development
+2026-04-17 19:35:26.119 +05:30 [INF] Content root path: D:\.Net-Web\Pharmacy_backend
+2026-04-17 19:35:26.778 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_vs/browserLink - null null
+2026-04-17 19:35:26.777 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - null null
+2026-04-17 19:35:26.883 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_framework/aspnetcore-browser-refresh.js - 200 16507 application/javascript; charset=utf-8 117.4915ms
+2026-04-17 19:35:27.097 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/_vs/browserLink - 200 null text/javascript; charset=UTF-8 333.3801ms
+2026-04-17 19:35:27.154 +05:30 [INF] Request starting HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - null null
+2026-04-17 19:35:27.222 +05:30 [INF] Request finished HTTP/1.1 GET http://localhost:5064/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 68.9932ms
