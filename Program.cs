@@ -51,7 +51,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Get password from environment variable
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-// Replace placeholder
+if (string.IsNullOrEmpty(dbPassword))
+{
+    throw new Exception("DB_PASSWORD environment variable is not set.");
+}
+
 connectionString = connectionString.Replace("{DB_PASSWORD}", dbPassword);
 
 // MySQL + EF Core

@@ -1,0 +1,185 @@
+2026-04-17 22:44:59.441 +05:30 [INF] Executed DbCommand (31ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE DATABASE `HackDB`;
+2026-04-17 22:44:59.509 +05:30 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-04-17 22:44:59.525 +05:30 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT GET_LOCK('__HackDB_EFMigrationsLock', 259200)
+2026-04-17 22:44:59.665 +05:30 [INF] Executed DbCommand (81ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
+    `MigrationId` varchar(150) CHARACTER SET utf8mb4 NOT NULL,
+    `ProductVersion` varchar(32) CHARACTER SET utf8mb4 NOT NULL,
+    CONSTRAINT `PK___EFMigrationsHistory` PRIMARY KEY (`MigrationId`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:44:59.716 +05:30 [INF] Executed DbCommand (31ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='HackDB' AND TABLE_NAME='__EFMigrationsHistory';
+2026-04-17 22:44:59.727 +05:30 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT `MigrationId`, `ProductVersion`
+FROM `__EFMigrationsHistory`
+ORDER BY `MigrationId`;
+2026-04-17 22:44:59.737 +05:30 [INF] Applying migration '20260417171350_Initial'.
+2026-04-17 22:44:59.832 +05:30 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER DATABASE CHARACTER SET utf8mb4;
+2026-04-17 22:44:59.873 +05:30 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Categories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+    `Description` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_Categories` PRIMARY KEY (`Id`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:44:59.914 +05:30 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Users` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `FullName` varchar(150) CHARACTER SET utf8mb4 NOT NULL,
+    `Email` varchar(200) CHARACTER SET utf8mb4 NOT NULL,
+    `Password` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Phone` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Address` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Role` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Customer'),
+    `IsEmailVerified` tinyint(1) NOT NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Users` PRIMARY KEY (`Id`)
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:44:59.965 +05:30 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Medicines` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `CategoryId` int NOT NULL,
+    `Name` varchar(200) CHARACTER SET utf8mb4 NOT NULL,
+    `GenericName` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Manufacturer` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Description` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Price` decimal(10,2) NOT NULL,
+    `DosageForm` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Strength` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `RequiresPrescription` tinyint(1) NOT NULL,
+    `ImagePath` longtext CHARACTER SET utf8mb4 NULL,
+    `IsActive` tinyint(1) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Medicines` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Medicines_Categories_CategoryId` FOREIGN KEY (`CategoryId`) REFERENCES `Categories` (`Id`) ON DELETE RESTRICT
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.016 +05:30 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `EmailVerifications` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `Token` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsUsed` tinyint(1) NOT NULL,
+    `ExpiresAt` datetime(6) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_EmailVerifications` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_EmailVerifications_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.064 +05:30 [INF] Executed DbCommand (47ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `LoginHistories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `IpAddress` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `DeviceInfo` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `IsSuccess` tinyint(1) NOT NULL,
+    `LoginAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_LoginHistories` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_LoginHistories_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.109 +05:30 [INF] Executed DbCommand (45ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Pharmacists` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `LicenseNumber` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+    `Qualification` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Specialization` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Pending'),
+    `ProfileImagePath` longtext CHARACTER SET utf8mb4 NULL,
+    `JoinedAt` datetime(6) NOT NULL,
+    `ApprovedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Pharmacists` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Pharmacists_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.153 +05:30 [INF] Executed DbCommand (44ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Prescriptions` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `FilePath` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `OriginalFileName` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `ReviewedBy` longtext CHARACTER SET utf8mb4 NULL,
+    `Notes` longtext CHARACTER SET utf8mb4 NULL,
+    `UploadedAt` datetime(6) NOT NULL,
+    `ReviewedAt` datetime(6) NULL,
+    CONSTRAINT `PK_Prescriptions` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Prescriptions_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.195 +05:30 [INF] Executed DbCommand (41ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Inventories` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `MedicineId` int NOT NULL,
+    `QuantityInStock` int NOT NULL,
+    `ReorderLevel` int NOT NULL,
+    `MaxStockLevel` int NOT NULL,
+    `ExpiryDate` datetime(6) NULL,
+    `BatchNumber` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `LastUpdated` datetime(6) NOT NULL,
+    CONSTRAINT `PK_Inventories` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Inventories_Medicines_MedicineId` FOREIGN KEY (`MedicineId`) REFERENCES `Medicines` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.246 +05:30 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `Orders` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` int NOT NULL,
+    `PrescriptionId` int NULL,
+    `Status` longtext CHARACTER SET utf8mb4 NOT NULL DEFAULT ('Pending'),
+    `TotalAmount` decimal(12,2) NOT NULL,
+    `DeliveryAddress` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `PaymentMethod` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `PaymentStatus` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Notes` longtext CHARACTER SET utf8mb4 NULL,
+    `OrderedAt` datetime(6) NOT NULL,
+    `DeliveredAt` datetime(6) NULL,
+    CONSTRAINT `PK_Orders` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_Orders_Prescriptions_PrescriptionId` FOREIGN KEY (`PrescriptionId`) REFERENCES `Prescriptions` (`Id`) ON DELETE SET NULL,
+    CONSTRAINT `FK_Orders_Users_UserId` FOREIGN KEY (`UserId`) REFERENCES `Users` (`Id`) ON DELETE RESTRICT
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.299 +05:30 [INF] Executed DbCommand (53ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE `OrderItems` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `OrderId` int NOT NULL,
+    `MedicineId` int NOT NULL,
+    `Quantity` int NOT NULL,
+    `UnitPrice` decimal(10,2) NOT NULL,
+    `TotalPrice` decimal(10,2) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_OrderItems` PRIMARY KEY (`Id`),
+    CONSTRAINT `FK_OrderItems_Medicines_MedicineId` FOREIGN KEY (`MedicineId`) REFERENCES `Medicines` (`Id`) ON DELETE RESTRICT,
+    CONSTRAINT `FK_OrderItems_Orders_OrderId` FOREIGN KEY (`OrderId`) REFERENCES `Orders` (`Id`) ON DELETE CASCADE
+) CHARACTER SET=utf8mb4;
+2026-04-17 22:45:00.348 +05:30 [INF] Executed DbCommand (48ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_EmailVerifications_UserId` ON `EmailVerifications` (`UserId`);
+2026-04-17 22:45:00.387 +05:30 [INF] Executed DbCommand (38ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Inventories_MedicineId` ON `Inventories` (`MedicineId`);
+2026-04-17 22:45:00.431 +05:30 [INF] Executed DbCommand (44ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_LoginHistories_UserId` ON `LoginHistories` (`UserId`);
+2026-04-17 22:45:00.544 +05:30 [INF] Executed DbCommand (112ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Medicines_CategoryId` ON `Medicines` (`CategoryId`);
+2026-04-17 22:45:00.595 +05:30 [INF] Executed DbCommand (51ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_OrderItems_MedicineId` ON `OrderItems` (`MedicineId`);
+2026-04-17 22:45:00.642 +05:30 [INF] Executed DbCommand (46ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_OrderItems_OrderId` ON `OrderItems` (`OrderId`);
+2026-04-17 22:45:00.691 +05:30 [INF] Executed DbCommand (49ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Orders_PrescriptionId` ON `Orders` (`PrescriptionId`);
+2026-04-17 22:45:00.739 +05:30 [INF] Executed DbCommand (48ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Orders_UserId` ON `Orders` (`UserId`);
+2026-04-17 22:45:00.772 +05:30 [INF] Executed DbCommand (32ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Pharmacists_LicenseNumber` ON `Pharmacists` (`LicenseNumber`);
+2026-04-17 22:45:00.806 +05:30 [INF] Executed DbCommand (34ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Pharmacists_UserId` ON `Pharmacists` (`UserId`);
+2026-04-17 22:45:00.842 +05:30 [INF] Executed DbCommand (35ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX `IX_Prescriptions_UserId` ON `Prescriptions` (`UserId`);
+2026-04-17 22:45:00.895 +05:30 [INF] Executed DbCommand (53ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX `IX_Users_Email` ON `Users` (`Email`);
+2026-04-17 22:45:00.908 +05:30 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
+VALUES ('20260417171350_Initial', '9.0.15');
+2026-04-17 22:45:00.912 +05:30 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT RELEASE_LOCK('__HackDB_EFMigrationsLock')
